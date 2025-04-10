@@ -19,14 +19,16 @@ class ExchangeStatus(models.Model):
 class ExchangeProposal(models.Model):
     ad_sender = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="my_sent_proposals"
     )
     ad_receiver = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name="my_received_proposals"
     )
     comment = models.TextField()
-    status = models.ForeignKey(ExchangeStatus.name, on_delete=models.CASCADE)
+    status = models.ForeignKey(ExchangeStatus, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
