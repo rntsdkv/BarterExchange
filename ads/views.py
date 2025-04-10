@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .forms import AdForm, RegistrationForm
+from .models import Ad
 
 
 def index(request):
@@ -48,3 +49,8 @@ def register(request):
 
 def success_new_ad(request):
     return render(request, 'success_new_ad.html')
+
+
+def ad(request):
+    ad = Ad.objects.get(id=request.GET.get('id'))
+    return render(request, 'ad.html', {'ad': ad})
