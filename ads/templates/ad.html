@@ -3,10 +3,12 @@
 <head></head>
 <body>
     <h1>{{ ad.title }}</h1>
-    <img src="../{{ ad.image }}" alt="{{ ad.image }}">
+    <p>{{ ad.image }}</p>
+    <img src="/media/{{ ad.image }}" alt="{{ ad.image }}">
     <p>Описание: {{ ad.description }}</p>
     <p>Категория: {{ ad.category }}</p>
     <p>Состояние: {{ ad.condition }}</p>
     <p>Дата создания: {{ ad.created_at }}</p>
+    <a href="edit">Изменить</a>
 </body>
 </html>

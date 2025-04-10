@@ -9,7 +9,7 @@ class Ad(models.Model):
     )
     title = models.CharField(max_length=100)
     description = models.TextField()
-    image = models.ImageField(upload_to='media/images/')
+    image = models.ImageField(upload_to='images/')
     category = models.CharField(max_length=100)
     condition = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)

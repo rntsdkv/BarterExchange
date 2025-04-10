@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AdForm, RegistrationForm
 from .models import Ad
 
@@ -47,10 +48,30 @@ def register(request):
     return render(request, 'registration.html', {'form': form})
 
 
-def success_new_ad(request):
-    return render(request, 'success_new_ad.html')
-
-
-def ad(request):
-    ad = Ad.objects.get(id=request.GET.get('id'))
+def ad(request, id):
+    ad = get_object_or_404(Ad, id=id)
     return render(request, 'ad.html', {'ad': ad})
+
+
+def no_access(request):
+    return render(request, 'no_access.html')
+
+def ad_edit(request, id):
+    ad = get_object_or_404(Ad, id=id)
+
+    print(ad)
+
+    if ad.user_id != request.user.id:
+        return redirect('no_access')
+
+    if request.method == 'POST':
+        form = AdForm(request.POST, request.FILES, instance=ad)
+        if form.is_valid():
+            form.save()
+            return redirect('ad', id=id)
+        else:
+            form = AdForm(instance=ad)
+    else:
+        form = AdForm(instance=ad)
+
+    return render(request, 'ad_edit.html', {'form': form, 'ad': ad})
