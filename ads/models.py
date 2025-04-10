@@ -4,11 +4,12 @@ from django.conf import settings
 class Ad(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='my_ads',
     )
     title = models.CharField(max_length=100)
     description = models.TextField()
-    image_url = models.URLField()
+    image = models.ImageField(upload_to='ads/images/')
     category = models.CharField(max_length=100)
     condition = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
