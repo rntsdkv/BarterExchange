@@ -1,5 +1,6 @@
 from pyexpat.errors import messages
 
+from django.db.models import Q
 from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AdForm, RegistrationForm
@@ -94,3 +95,14 @@ def ad_delete(request, id):
     message = "Что-то пошло не так..."
     color = "red"
     return redirect(f'/?message={message}&color={color}')
+
+
+def search(request):
+    query = request.GET.get('query')
+    results = []
+
+    if query:
+        results = Ad.objects.filter(Q(title__icontains=query) | Q(description__icontains=query))
+        print(results)
+
+    return render(request, 'search.html', {'query': query, 'results': results})

@@ -9,6 +9,12 @@
         </div>
     {% endif %}
 
+    <form action="{% url 'search' %}" method="get">
+        {% csrf_token %}
+        <input type="text" name="query" placeholder="Поиск" required>
+        <button type="submit">Поиск</button>
+    </form>
+
     {% if user.is_authenticated %}
         <h2>Пользователь {{ user.username }}</h2>
         <a href="{% url 'new_ad' %}">Создать объявление</a>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+    <h1>Поиск</h1>
+
+    <form action="{% url 'search' %}" method="get">
+        {% csrf_token %}
+        <input type="text" name="query" placeholder="Поиск" value="{{ query }}" required>
+        <button type="submit">Поиск</button>
+    </form>
+
+    {% if results %}
+        {% for ad in user.my_ads.all %}
+            <a href="/ad/{{ ad.id }}">
+                <h3>{{ ad.title }}</h3>
+                <p>{{ ad.description }}</p>
+            </a>
+        {% endfor %}
+    {% else %}
+        <p>Ничего не нашли</p>
+    {% endif %}
+</body>
+</html>
