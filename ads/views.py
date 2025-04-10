@@ -9,7 +9,7 @@ def index(request):
     return render(request, 'index.html', {'ad_success': ad_success})
 
 
-def ad_form(request):
+def new_ad_form(request):
     if request.method == 'POST':
         form = AdForm(request.POST, request.FILES)
         if form.is_valid():
