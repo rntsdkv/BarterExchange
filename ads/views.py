@@ -26,11 +26,11 @@ def ad_form(request):
 
             context = {'form': form,
                        'success': False}
-        return render(request, 'ad.html', context)
+        return render(request, 'new_ad.html', context)
     elif request.method == 'GET':
         context = {'form': AdForm(),
                    'success': True}
-        return render(request, 'ad.html', context)
+        return render(request, 'new_ad.html', context)
 
 
 def register(request):
