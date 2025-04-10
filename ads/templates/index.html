@@ -16,8 +16,10 @@
             <p>У вас нет объявлений</p>
         {% else %}
             {% for ad in user.my_ads.all %}
-                <h3>{{ ad.title }}</h3>
-                <p>{{ ad.description }}</p>
+                <a href="/ad?id={{ ad.id }}">
+                    <h3>{{ ad.title }}</h3>
+                    <p>{{ ad.description }}</p>
+                </a>
             {% endfor %}
         {% endif %}
     {% else %}
