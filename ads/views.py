@@ -1,13 +1,13 @@
-from django.shortcuts import render
 from django.shortcuts import render, redirect
 from .forms import AdForm, RegistrationForm
 
-# Create your views here.
 
 def index(request):
     if request.user.is_authenticated:
         print(request.user.my_ads.all())
     return render(request, 'index.html')
+
+
 def ad_form(request):
     if request.method == 'POST':
         form = AdForm(request.POST, request.FILES)
@@ -30,5 +30,20 @@ def ad_form(request):
         context = {'form': AdForm(),
                    'success': True}
         return render(request, 'ad.html', context)
+
+
+def register(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            return redirect('login')
+    else:
+        form = RegistrationForm()
+    return render(request, 'registration.html', {'form': form})
+
+
 def success_new_ad(request):
     return render(request, 'success_new_ad.html')

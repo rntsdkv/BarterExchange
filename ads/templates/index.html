@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+    <h1>Главная страница</h1>
+    {% if user.is_authenticated %}
+        <h2>Пользователь {{ user.username }}</h2>
+        <a href="{% url 'new_ad' %}">Создать объявление</a>
+
+        {% if ad_success %}
+            <h2>Объявление успешно загружено</h2>
+        {% endif %}
+    {% else %}
+        <a href="{% url 'auth' %}">Войти</a>
+    {% endif %}
+</body>
+</html>
