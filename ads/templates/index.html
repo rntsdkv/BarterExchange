@@ -10,6 +10,16 @@
         {% if ad_success %}
             <h2>Объявление успешно загружено</h2>
         {% endif %}
+
+        <h1>Мои объявления</h1>
+        {% if user.my_ads.count == 0 %}
+            <p>У вас нет объявлений</p>
+        {% else %}
+            {% for ad in user.my_ads.all %}
+                <h3>{{ ad.title }}</h3>
+                <p>{{ ad.description }}</p>
+            {% endfor %}
+        {% endif %}
     {% else %}
         <a href="{% url 'auth' %}">Войти</a>
     {% endif %}
