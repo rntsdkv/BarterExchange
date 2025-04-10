@@ -1,14 +1,15 @@
-from django.http import HttpResponseForbidden
+from pyexpat.errors import messages
+
+from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AdForm, RegistrationForm
 from .models import Ad
 
 
 def index(request):
-    ad_success = request.GET.get('ad_success')
-    if request.user.is_authenticated:
-        print(request.user.my_ads.all())
-    return render(request, 'index.html', {'ad_success': ad_success})
+    message = request.GET.get('message')
+    color = request.GET.get('color')
+    return render(request, 'index.html', {'message': message, 'color': color})
 
 
 def new_ad_form(request):
@@ -20,8 +21,9 @@ def new_ad_form(request):
             ad.save()
             print(form.cleaned_data)
 
-            ad_success = True
-            return redirect(f'/?ad_success={ad_success}')
+            message = "Объявление успешно опубликовано"
+            color = "green"
+            return redirect(f'/?message={message}&color={color}')
         else:
             print(form.errors)
             form = AdForm()
@@ -50,8 +52,8 @@ def register(request):
 
 def ad(request, id):
     ad = get_object_or_404(Ad, id=id)
+    # todo: fix 404 page
     return render(request, 'ad.html', {'ad': ad})
-
 
 def no_access(request):
     return render(request, 'no_access.html')
@@ -75,3 +77,20 @@ def ad_edit(request, id):
         form = AdForm(instance=ad)
 
     return render(request, 'ad_edit.html', {'form': form, 'ad': ad})
+
+def ad_delete(request, id):
+    ad = get_object_or_404(Ad, id=id)
+
+    if request.method == 'POST':
+        if ad.user_id != request.user.id:
+            return redirect('no_access')
+
+        ad.delete()
+
+        message = "Объявление успешно удалено"
+        color = "green"
+        return redirect(f'/?message={message}&color={color}')
+
+    message = "Что-то пошло не так..."
+    color = "red"
+    return redirect(f'/?message={message}&color={color}')

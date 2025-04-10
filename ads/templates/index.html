@@ -3,13 +3,15 @@
 <head></head>
 <body>
     <h1>Главная страница</h1>
+    {% if message %}
+        <div style="background-color: {{ color }};">
+            <h2>{{ message }}</h2>
+        </div>
+    {% endif %}
+
     {% if user.is_authenticated %}
         <h2>Пользователь {{ user.username }}</h2>
         <a href="{% url 'new_ad' %}">Создать объявление</a>
-
-        {% if ad_success %}
-            <h2>Объявление успешно загружено</h2>
-        {% endif %}
 
         <h1>Мои объявления</h1>
         {% if user.my_ads.count == 0 %}

@@ -9,6 +9,13 @@
     <p>Категория: {{ ad.category }}</p>
     <p>Состояние: {{ ad.condition }}</p>
     <p>Дата создания: {{ ad.created_at }}</p>
-    <a href="edit">Изменить</a>
+
+    {% if user.id == ad.user_id %}
+        <a href="edit/">Изменить</a>
+        <form action="delete/" method="post">
+            {% csrf_token %}
+            <button type="submit" onclick="return confirm('Точно удалить?')">Удалить объявление</button>
+        </form>
+    {% endif %}
 </body>
 </html>
