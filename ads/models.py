@@ -13,8 +13,10 @@ class Ad(models.Model):
     condition = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
 
-class ExchangeStatus(models.Model):
-    name = models.CharField(max_length=40)
+class StatusChoices(models.TextChoices):
+    PENDING = "pending", "Ожидает"
+    ACCEPTED = "accepted", "Принята"
+    REJECTED = "rejected", "Отклонена"
 
 class ExchangeProposal(models.Model):
     ad_sender = models.ForeignKey(
@@ -28,7 +30,11 @@ class ExchangeProposal(models.Model):
         related_name="my_received_proposals"
     )
     comment = models.TextField()
-    status = models.ForeignKey(ExchangeStatus, on_delete=models.CASCADE)
+    status = models.CharField(
+        max_length=10,
+        choices=StatusChoices.choices,
+        default=StatusChoices.PENDING
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
 
