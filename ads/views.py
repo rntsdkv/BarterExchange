@@ -3,9 +3,10 @@ from .forms import AdForm, RegistrationForm
 
 
 def index(request):
+    ad_success = request.GET.get('ad_success')
     if request.user.is_authenticated:
         print(request.user.my_ads.all())
-    return render(request, 'index.html')
+    return render(request, 'index.html', {'ad_success': ad_success})
 
 
 def ad_form(request):
@@ -17,8 +18,8 @@ def ad_form(request):
             ad.save()
             print(form.cleaned_data)
 
-            context = {'ad_success': True}
-            return render(request, 'index.html', context)
+            ad_success = True
+            return redirect(f'/?ad_success={ad_success}')
         else:
             print(form.errors)
             form = AdForm()
