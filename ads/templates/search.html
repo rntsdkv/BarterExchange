@@ -9,7 +9,7 @@
         <button type="submit">Поиск</button>
     </form>
 
-    {% if results %}
+    {% if results.count %}
         {% for ad in results_of_page %}
             <a href="/ad/{{ ad.id }}">
                 <h3>{{ ad.title }}</h3>
