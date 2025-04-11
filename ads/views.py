@@ -12,12 +12,14 @@ def index(request):
 
 
 def new_ad_form(request):
+    if not request.user.is_authenticated:
+        return redirect('auth')
+
     if request.method == 'POST':
         form = AdForm(request.POST, request.FILES)
         if form.is_valid():
             ad = form.save(commit=False)
-            # todo: proeb: user a ne user_id
-            ad.user_id = request.user.id
+            ad.user = request.user
             ad.save()
             print(form.cleaned_data)
 
@@ -63,7 +65,7 @@ def ad_edit(request, id):
 
     print(ad)
 
-    if ad.user_id != request.user.id:
+    if ad.user != request.user:
         return redirect('no_access')
 
     if request.method == 'POST':
@@ -82,7 +84,7 @@ def ad_delete(request, id):
     ad = get_object_or_404(Ad, id=id)
 
     if request.method == 'POST':
-        if ad.user_id != request.user.id:
+        if ad.user != request.user:
             return redirect('no_access')
 
         ad.delete()
