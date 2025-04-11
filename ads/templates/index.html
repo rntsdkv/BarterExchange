@@ -10,7 +10,6 @@
     {% endif %}
 
     <form action="{% url 'search' %}" method="get">
-        {% csrf_token %}
         <input type="text" name="query" placeholder="Поиск" required>
         <button type="submit">Поиск</button>
     </form>

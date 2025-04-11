@@ -1,7 +1,5 @@
-from pyexpat.errors import messages
-
+from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import HttpResponseForbidden, HttpResponseRedirect, HttpResponseNotAllowed
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AdForm, RegistrationForm
 from .models import Ad
@@ -18,6 +16,7 @@ def new_ad_form(request):
         form = AdForm(request.POST, request.FILES)
         if form.is_valid():
             ad = form.save(commit=False)
+            # todo: proeb: user a ne user_id
             ad.user_id = request.user.id
             ad.save()
             print(form.cleaned_data)
@@ -45,7 +44,7 @@ def register(request):
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
-            return redirect('login')
+            return redirect('auth')
     else:
         form = RegistrationForm()
     return render(request, 'registration.html', {'form': form})
@@ -99,10 +98,21 @@ def ad_delete(request, id):
 
 def search(request):
     query = request.GET.get('query')
-    results = []
+    page = request.GET.get('p')
+    if page is None: page = 1
+    paginator = None
+    results_of_page = None
 
     if query:
         results = Ad.objects.filter(Q(title__icontains=query) | Q(description__icontains=query))
-        print(results)
+        paginator = Paginator(results, 1)
+        results_of_page = paginator.get_page(page)
 
-    return render(request, 'search.html', {'query': query, 'results': results})
+    return render(request, 'search.html', {
+        'query': query,
+        'results': paginator,
+        'results_of_page': results_of_page,
+        'next_page': results_of_page.number + 1,
+        'current_page': page,
+        'previous_page': results_of_page.number - 1
+    })

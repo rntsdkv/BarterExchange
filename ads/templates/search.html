@@ -5,18 +5,30 @@
     <h1>Поиск</h1>
 
     <form action="{% url 'search' %}" method="get">
-        {% csrf_token %}
         <input type="text" name="query" placeholder="Поиск" value="{{ query }}" required>
         <button type="submit">Поиск</button>
     </form>
 
     {% if results %}
-        {% for ad in user.my_ads.all %}
+        {% for ad in results_of_page %}
             <a href="/ad/{{ ad.id }}">
                 <h3>{{ ad.title }}</h3>
                 <p>{{ ad.description }}</p>
             </a>
         {% endfor %}
+        {% if previous_page != 0 %}
+            <a href="/search?query={{ query }}&p={{ previous_page }}"><–</a>
+        {% endif %}
+        {% for page_num in results.page_range %}
+            {% if page_num == current_page %}
+                <a href="/search?query={{ query }}&p={{ page_num }}" style="color: green;">{{ page_num }}</a>
+            {% else %}
+                <a href="/search?query={{ query }}&p={{ page_num }}">{{ page_num }}</a>
+            {% endif %}
+        {% endfor %}
+        {% if next_page <= results.num_pages %}
+            <a href="/search?query={{ query }}&p={{ next_page }}">–></a>
+        {% endif %}
     {% else %}
         <p>Ничего не нашли</p>
     {% endif %}
