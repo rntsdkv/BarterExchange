@@ -64,6 +64,8 @@ class ExchangeProposal(models.Model):
         self.status = StatusChoices.ACCEPTED
         self.ad_sender.status = AdStatus.EXCHANGED
         self.ad_receiver.status = AdStatus.EXCHANGED
+        self.ad_sender.save()
+        self.ad_receiver.save()
         self.save()
 
     def reject(self):

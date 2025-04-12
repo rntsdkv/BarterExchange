@@ -19,10 +19,10 @@
         <a href="{% url 'new_ad' %}">Создать объявление</a>
 
         <h1>Мои объявления</h1>
-        {% if user.my_ads.count == 0 %}
+        {% if not user_ads %}
             <p>У вас нет объявлений</p>
         {% else %}
-            {% for ad in user.my_ads.all %}
+            {% for ad in user_ads %}
                 <a href="/ad/{{ ad.id }}">
                     <h3>{{ ad.title }}</h3>
                     <p>{{ ad.description }}</p>
@@ -41,6 +41,7 @@
                     <h3>{{ proposal.ad_receiver.title }}</h3>
                     <p>{{ proposal.ad_receiver.description }}</p>
                 </a>
+                <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>
             {% endfor %}
         {% endif %}
 
@@ -55,6 +56,7 @@
                     <h3>{{ proposal.ad_receiver.title }}</h3>
                     <p>{{ proposal.ad_receiver.description }}</p>
                 </a>
+                <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>
             {% endfor %}
         {% endif %}
     {% else %}

@@ -2,7 +2,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AdForm, RegistrationForm
-from .models import Ad, ExchangeProposal
+from .models import Ad, ExchangeProposal, StatusChoices, AdStatus
 
 
 def index(request):
@@ -10,13 +10,13 @@ def index(request):
     outcome_proposals = []
 
     if request.user.is_authenticated:
-        user_ads = request.user.my_ads.all()
+        user_ads = request.user.my_ads.filter(status=AdStatus.ACTIVE)
 
         outcome_proposals = ExchangeProposal.objects.filter(
-            ad_sender__in=user_ads
+            Q(ad_sender__in=user_ads) & Q(status=StatusChoices.PENDING)
         )
         income_proposals = ExchangeProposal.objects.filter(
-            ad_receiver__in=user_ads
+            Q(ad_receiver__in=user_ads) & Q(status=StatusChoices.PENDING)
         )
 
     context = {
@@ -119,14 +119,18 @@ def search(request):
     query = request.GET.get('query')
     page = request.GET.get('p')
     if page is None: page = 1
-    paginator = None
-    results_of_page = None
 
     if query:
         # todo: исправить нижний регистр
-        results = Ad.objects.filter(Q(title__icontains=query) | Q(description__icontains=query))
-        paginator = Paginator(results, 1)
-        results_of_page = paginator.get_page(page)
+        results = Ad.objects.filter(
+            Q(status=AdStatus.ACTIVE) &
+            (Q(title__icontains=query) | Q(description__icontains=query))
+        )
+    else:
+        results = Ad.objects.filter(status=AdStatus.ACTIVE)
+
+    paginator = Paginator(results, 10)
+    results_of_page = paginator.get_page(page)
 
     return render(request, 'search.html', {
         'query': query,
@@ -160,12 +164,45 @@ def ad_exсhange(request, id):
         color = "green"
         return redirect(f'/?message={message}&color={color}')
 
-    return render(request, "exchange_selected.html", {'ad': ad, 'user_ad': user_ad})
+    context = {
+        'ad': ad,
+        'user_ad': user_ad
+    }
+    return render(request, "exchange_selected.html", context)
 
 
-def exchange(request):
-    return None
+def exchange(request, id):
+    proposal = get_object_or_404(ExchangeProposal, id=id)
+    ad_sender = proposal.ad_sender
+    ad_receiver = proposal.ad_receiver
+
+    context = {
+        'proposal': proposal,
+        'ad': ad_sender,
+        'user_ad': ad_receiver
+    }
+    return render(request, "exchange_page.html", context)
 
 
-def exchange_update(request):
-    return None
+def exchange_update(request, id):
+    proposal = get_object_or_404(ExchangeProposal, id=id)
+    if not request.user.is_authenticated:
+        return redirect('auth')
+
+    if request.method == 'POST' and proposal.status == StatusChoices.PENDING:
+        action = request.GET.get('action')
+        print(action)
+
+        if action == 'reject':
+            if request.user.id == proposal.ad_sender.user_id or request.user.id == proposal.ad_receiver.user_id:
+                print('reject')
+                proposal.reject()
+            else:
+                return redirect('no_access')
+        elif action == 'accept':
+            if request.user.id == proposal.ad_receiver.user_id:
+                proposal.accept()
+            else:
+                return redirect('no_access')
+
+    return redirect(f'/exchange/{id}/')

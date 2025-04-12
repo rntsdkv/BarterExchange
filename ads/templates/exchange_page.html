@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+    <h1>Обмен</h1>
+    <p>Вы получаете:</p>
+    <a href="/ad/{{ ad.id }}">
+        <h3>{{ ad.title }}</h3>
+        <p>{{ ad.description }}</p>
+    </a>
+
+    <p>Вы отдаете:</p>
+    <a href="/ad/{{ user_ad.id }}">
+        <h3>{{ user_ad.title }}</h3>
+        <p>{{ user_ad.description }}</p>
+    </a>
+
+    <p>Комментарий: {{ proposal.comment }}</p>
+
+    {% if user.is_authenticated and proposal.status == 'pending' %}
+        {% if user.id == proposal.ad_receiver.user_id %}
+            <form action="/exchange/{{ proposal.id }}/update/?action=accept" method="post">
+                {% csrf_token %}
+                <button type="submit">Согласиться</button>
+            </form>
+        {% endif %}
+
+        {% if user.id == proposal.ad_sender.user_id or user.id == proposal.ad_receiver.user_id %}
+            <form action="/exchange/{{ proposal.id }}/update/?action=reject" method="post">
+                {% csrf_token %}
+                <button type="submit">Отказаться</button>
+            </form>
+        {% endif %}
+    {% endif %}
+</body>
+</html>
