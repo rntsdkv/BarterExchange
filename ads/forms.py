@@ -7,14 +7,34 @@ class AdForm(forms.ModelForm):
     class Meta:
         model = Ad
         fields = ['title', 'description', 'image', 'category', 'condition']
+        labels = {
+            'title': 'Название',
+            'description': 'Описание',
+            'image': 'Фото',
+            'category': 'Категория',
+            'condition': 'Состояние'
+        }
 
 class RegistrationForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput())
     password_confirm = forms.CharField(widget=forms.PasswordInput())
+    password = forms.CharField(
+        widget=forms.PasswordInput(),
+        label='Пароль'
+    )
+    password_confirm = forms.CharField(
+        widget=forms.PasswordInput(),
+        label='Повторите пароль'
+    )
 
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name']
+        labels = {
+            'username': 'Никнейм',
+            'first_name': 'Имя',
+            'last_name': 'Фамилия'
+        }
 
     def clean(self):
         cleaned_data = super().clean()
