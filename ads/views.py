@@ -2,13 +2,30 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import AdForm, RegistrationForm
-from .models import Ad
+from .models import Ad, ExchangeProposal
 
 
 def index(request):
-    message = request.GET.get('message')
-    color = request.GET.get('color')
-    return render(request, 'index.html', {'message': message, 'color': color})
+    income_proposals = []
+    outcome_proposals = []
+
+    if request.user.is_authenticated:
+        user_ads = request.user.my_ads.all()
+
+        outcome_proposals = ExchangeProposal.objects.filter(
+            ad_sender__in=user_ads
+        )
+        income_proposals = ExchangeProposal.objects.filter(
+            ad_receiver__in=user_ads
+        )
+
+    context = {
+        'message': request.GET.get('message'),
+        'color': request.GET.get('color'),
+        'income_proposals': income_proposals,
+        'outcome_proposals': outcome_proposals
+    }
+    return render(request, 'index.html', context)
 
 
 def new_ad_form(request):
@@ -106,6 +123,7 @@ def search(request):
     results_of_page = None
 
     if query:
+        # todo: исправить нижний регистр
         results = Ad.objects.filter(Q(title__icontains=query) | Q(description__icontains=query))
         paginator = Paginator(results, 1)
         results_of_page = paginator.get_page(page)
@@ -118,3 +136,36 @@ def search(request):
         'current_page': page,
         'previous_page': results_of_page.number - 1
     })
+
+
+def ad_exсhange(request, id):
+    if not request.user.is_authenticated:
+        return redirect('auth')
+
+    ad = get_object_or_404(Ad, id=id)
+    selected = request.GET.get('selected')
+
+    if selected is None or not selected.isdigit():
+        return render(request, "exchange.html", {'ad': ad})
+
+    user_ad = get_object_or_404(Ad, id=int(selected))
+
+    if request.method == 'POST':
+        # todo: проверка что пользователь не один и тот же
+        comment = request.POST.get("comment")
+        print(user_ad, ad, comment)
+        ExchangeProposal.objects.create(ad_sender=user_ad, ad_receiver=ad, comment=comment)
+
+        message = "Вы отправили запрос на обмен"
+        color = "green"
+        return redirect(f'/?message={message}&color={color}')
+
+    return render(request, "exchange_selected.html", {'ad': ad, 'user_ad': user_ad})
+
+
+def exchange(request):
+    return None
+
+
+def exchange_update(request):
+    return None

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+    <h1>Обмен</h1>
+    <p>Вы получаете:</p>
+    <a href="/ad/{{ ad.id }}">
+        <h3>{{ ad.title }}</h3>
+        <p>{{ ad.description }}</p>
+    </a>
+
+    <h1>Мои объявления</h1>
+    {% if user.my_ads.count == 0 %}
+        <p>У вас нет объявлений</p>
+        <a href="{% url 'new_ad' %}">Создать объявление</a>
+    {% else %}
+        {% for user_ad in user.my_ads.all %}
+            <a href="/ad/{{ ad.id }}/exchange?selected={{ user_ad.id }}">
+                <h3>{{ user_ad.title }}</h3>
+                <p>{{ user_ad.description }}</p>
+            </a>
+        {% endfor %}
+    {% endif %}
+</body>
+</html>

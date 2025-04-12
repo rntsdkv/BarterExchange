@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+    <form action="/ad/{{ ad.id }}/exchange/?selected={{ user_ad.id }}" method="post">
+        {% csrf_token %}
+
+        <h1>Обмен</h1>
+        <p>Вы получаете:</p>
+        <a href="/ad/{{ ad.id }}">
+            <h3>{{ ad.title }}</h3>
+            <p>{{ ad.description }}</p>
+        </a>
+
+        <p>Вы отдаете:</p>
+        <a href="/ad/{{ user_ad.id }}">
+            <h3>{{ user_ad.title }}</h3>
+            <p>{{ user_ad.description }}</p>
+        </a>
+
+        <input type="text" name="comment" placeholder="Комментарий">
+        <button type="submit">Предложить обмен</button>
+    </form>
+</body>
+</html>

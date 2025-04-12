@@ -29,6 +29,34 @@
                 </a>
             {% endfor %}
         {% endif %}
+
+        {% if income_proposals %}
+            <h1>Входящие запросы на обмен</h1>
+            {% for proposal in income_proposals %}
+                <a href="/ad/{{ proposal.ad_sender.id }}">
+                    <h3>{{ proposal.ad_sender.title }}</h3>
+                    <p>{{ proposal.ad_sender.description }}</p>
+                </a>
+                <a href="/ad/{{ proposal.ad_receiver.id }}">
+                    <h3>{{ proposal.ad_receiver.title }}</h3>
+                    <p>{{ proposal.ad_receiver.description }}</p>
+                </a>
+            {% endfor %}
+        {% endif %}
+
+        {% if outcome_proposals %}
+            <h1>Исходящие запросы на обмен</h1>
+            {% for proposal in outcome_proposals %}
+                <a href="/ad/{{ proposal.ad_sender.id }}">
+                    <h3>{{ proposal.ad_sender.title }}</h3>
+                    <p>{{ proposal.ad_sender.description }}</p>
+                </a>
+                <a href="/ad/{{ proposal.ad_receiver.id }}">
+                    <h3>{{ proposal.ad_receiver.title }}</h3>
+                    <p>{{ proposal.ad_receiver.description }}</p>
+                </a>
+            {% endfor %}
+        {% endif %}
     {% else %}
         <a href="{% url 'auth' %}">Войти</a>
     {% endif %}

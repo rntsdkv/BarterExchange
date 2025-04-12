@@ -16,6 +16,8 @@
             {% csrf_token %}
             <button type="submit" onclick="return confirm('Точно удалить?')">Удалить объявление</button>
         </form>
+    {% else %}
+        <a href="exchange/">Обменяться</a>
     {% endif %}
 </body>
 </html>
