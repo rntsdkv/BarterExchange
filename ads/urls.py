@@ -18,7 +18,7 @@ urlpatterns = [
     path('exchange/<int:id>/', views.exchange, name='exchange'),
     path('exchange/<int:id>/update/', views.exchange_update, name='exchange_update'),
     path('no_access/', views.no_access, name='no_access'),
-    path('search/', views.search, name='search'),
+    path('search/', AdFilterView.as_view(), name='search'),
 ]
 
 if settings.DEBUG:

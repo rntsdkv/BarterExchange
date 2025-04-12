@@ -1,6 +1,8 @@
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
+from django_filters.views import FilterView
+
 from .forms import AdForm, RegistrationForm
 from .models import Ad, ExchangeProposal, StatusChoices, AdStatus
 
@@ -8,6 +10,7 @@ from .models import Ad, ExchangeProposal, StatusChoices, AdStatus
 def index(request):
     income_proposals = []
     outcome_proposals = []
+    user_ads = []
 
     if request.user.is_authenticated:
         user_ads = request.user.my_ads.filter(status=AdStatus.ACTIVE)
@@ -23,7 +26,8 @@ def index(request):
         'message': request.GET.get('message'),
         'color': request.GET.get('color'),
         'income_proposals': income_proposals,
-        'outcome_proposals': outcome_proposals
+        'outcome_proposals': outcome_proposals,
+        'user_ads': user_ads
     }
     return render(request, 'index.html', context)
 
@@ -115,9 +119,10 @@ def ad_delete(request, id):
     return redirect(f'/?message={message}&color={color}')
 
 
+'''
 def search(request):
     query = request.GET.get('query')
-    page = request.GET.get('p')
+    page = request.GET.get('page')
     if page is None: page = 1
 
     if query:
@@ -132,15 +137,18 @@ def search(request):
     paginator = Paginator(results, 10)
     results_of_page = paginator.get_page(page)
 
+    filter_form = FilterView()
+
     return render(request, 'search.html', {
         'query': query,
-        'results': paginator,
+        'results': results,
         'results_of_page': results_of_page,
         'next_page': results_of_page.number + 1,
         'current_page': page,
-        'previous_page': results_of_page.number - 1
+        'previous_page': results_of_page.number - 1,
+        'form': filter_form
     })
-
+'''
 
 def ad_exсhange(request, id):
     if not request.user.is_authenticated:
