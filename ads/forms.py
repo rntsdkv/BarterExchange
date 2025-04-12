@@ -16,8 +16,6 @@ class AdForm(forms.ModelForm):
         }
 
 class RegistrationForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput())
-    password_confirm = forms.CharField(widget=forms.PasswordInput())
     password = forms.CharField(
         widget=forms.PasswordInput(),
         label='Пароль'

@@ -3,11 +3,12 @@ from django.conf.urls.static import static
 from django.contrib.auth.views import LoginView
 from django.urls import path
 from . import views
+from .forms import AdFilterView, CustomLoginView
 
 urlpatterns = [
     #    path("admin/", admin.site.urls),
     path('', views.index, name='index'),
-    path('auth/', LoginView.as_view(template_name='auth.html'), name='auth'),
+    path('auth/', CustomLoginView.as_view(), name='auth'),
     path('register/', views.register, name='register'),
     path('new_ad/', views.new_ad_form, name='new_ad'),
     path('ad/<int:id>/', views.ad, name='ad'),
