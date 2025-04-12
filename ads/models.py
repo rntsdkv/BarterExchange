@@ -7,6 +7,10 @@ class AdCondition(models.TextChoices):
     NEW = "new", "Новый"
     USED = "used", "Б/у"
 
+class AdStatus(models.TextChoices):
+    ACTIVE = "active", "Активное"
+    EXCHANGED = "exchanged", "Обменяли"
+
 class AdCategory(models.Model):
     title = models.CharField(max_length=100)
 
@@ -29,6 +33,11 @@ class Ad(models.Model):
         default=AdCondition.NEW
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(
+        max_length=10,
+        choices=AdStatus.choices,
+        default=AdStatus.ACTIVE
+    )
 
     def delete(self, *args, **kwargs):
         if self.image and os.path.isfile(self.image.path):
@@ -41,8 +50,8 @@ class StatusChoices(models.TextChoices):
     REJECTED = "rejected", "Отклонена"
 
 class ExchangeProposal(models.Model):
-    ad_sender = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='ad_sender_id')
-    ad_receiver = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='ad_receiver_id')
+    ad_sender = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='sent_proposals')
+    ad_receiver = models.ForeignKey(Ad, on_delete=models.CASCADE, related_name='received_proposals')
     comment = models.TextField()
     status = models.CharField(
         max_length=10,
@@ -51,4 +60,12 @@ class ExchangeProposal(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def accept(self):
+        self.status = StatusChoices.ACCEPTED
+        self.ad_sender.status = AdStatus.EXCHANGED
+        self.ad_receiver.status = AdStatus.EXCHANGED
+        self.save()
 
+    def reject(self):
+        self.status = StatusChoices.REJECTED
+        self.save()
