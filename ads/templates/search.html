@@ -4,33 +4,32 @@
 <body>
     <h1>Поиск</h1>
 
-    <form action="{% url 'search' %}" method="get">
-        <input type="text" name="query" placeholder="Поиск" value="{{ query }}" required>
-        <button type="submit">Поиск</button>
+    <form method="get">
+        {{ filter.form.as_p }}
+    <button type="submit">Применить</button>
     </form>
 
-    {% if results.count %}
-        {% for ad in results_of_page %}
-            <a href="/ad/{{ ad.id }}">
-                <h3>{{ ad.title }}</h3>
-                <p>{{ ad.description }}</p>
-            </a>
-        {% endfor %}
-        {% if previous_page != 0 %}
-            <a href="/search?query={{ query }}&p={{ previous_page }}"><–</a>
+    <hr>
+
+    {% for ad in ads %}
+        <a href="/ad/{{ ad.id }}">
+            <h3>{{ ad.title }}</h3>
+            <p>{{ ad.description }}</p>
+        </a>
+    {% empty %}
+        <p>Нет объявлений</p>
+    {% endfor %}
+
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">← Назад</a>
         {% endif %}
-        {% for page_num in results.page_range %}
-            {% if page_num == current_page %}
-                <a href="/search?query={{ query }}&p={{ page_num }}" style="color: green;">{{ page_num }}</a>
-            {% else %}
-                <a href="/search?query={{ query }}&p={{ page_num }}">{{ page_num }}</a>
-            {% endif %}
-        {% endfor %}
-        {% if next_page <= results.num_pages %}
-            <a href="/search?query={{ query }}&p={{ next_page }}">–></a>
+
+        <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">Вперёд →</a>
         {% endif %}
-    {% else %}
-        <p>Ничего не нашли</p>
-    {% endif %}
+    </div>
 </body>
 </html>
