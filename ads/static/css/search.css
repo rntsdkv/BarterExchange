@@ -1,0 +1,14 @@
+.ad {
+    background-color: aliceblue;
+    width: 200px;
+}
+
+.ad-image {
+    max-width: 100px;
+    max-height: 100px;
+}
+
+.ad-category, .ad-condition, .ad-user, .ad-datetime {
+    font-size: 12px;
+    opacity: 0.5;
+}
