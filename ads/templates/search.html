@@ -1,6 +1,9 @@
 <!DOCTYPE html>
+{% load static %}
 <html>
-<head></head>
+<head>
+    <link href="{% static "css/search.css" %}" rel="stylesheet">
+</head>
 <body>
     <h1>Поиск</h1>
 
@@ -12,10 +15,16 @@
     <hr>
 
     {% for ad in ads %}
-        <a href="/ad/{{ ad.id }}">
-            <h3>{{ ad.title }}</h3>
+        <div class="ad">
+            <img class="ad-image" src="/media/{{ ad.image }}" alt="{{ ad.image }}">
+            <p></p>
+            <a href="/ad/{{ ad.id }}">{{ ad.title }}</a>
+            <p class="ad-user">Владелец: {{ ad.user.username }}</p>
             <p>{{ ad.description }}</p>
-        </a>
+            <p class="ad-category">{{ ad.category }}</p>
+            <p class="ad-condition">{{ ad.condition }}</p>
+            <p class="ad-datetime">{{ ad.created_at }}</p>
+        </div>
     {% empty %}
         <p>Нет объявлений</p>
     {% endfor %}

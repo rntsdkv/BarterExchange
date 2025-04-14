@@ -1,8 +1,11 @@
 <!DOCTYPE html>
-<html>
-<head></head>
+{% load static %}
+<html lang="ru">
+<head>
+    <link href="{% static "css/index.css" %}" rel="stylesheet">
+</head>
 <body>
-    <h1>Главная страница</h1>
+    <h1>Бартерный обмен</h1>
     {% if message %}
         <div style="background-color: {{ color }};">
             <h2>{{ message }}</h2>
@@ -10,8 +13,8 @@
     {% endif %}
 
     <form action="{% url 'search' %}" method="get">
-        <input type="text" name="search" placeholder="Поиск" required>
-        <button type="submit">Поиск</button>
+        <input type="text" name="search" placeholder="Поиск по объявлениям" required>
+        <button type="submit">Найти</button>
     </form>
 
     {% if user.is_authenticated %}
@@ -23,42 +26,41 @@
             <p>У вас нет объявлений</p>
         {% else %}
             {% for ad in user_ads %}
-                <a href="/ad/{{ ad.id }}">
-                    <h3>{{ ad.title }}</h3>
+                <div class="ad">
+                    <img class="ad-image" src="/media/{{ ad.image }}" alt="{{ ad.image }}">
+                    <p></p>
+                    <a href="/ad/{{ ad.id }}">{{ ad.title }}</a>
                     <p>{{ ad.description }}</p>
-                </a>
+                    <p class="ad-category">{{ ad.category }}</p>
+                </div>
             {% endfor %}
         {% endif %}
 
-        {% if income_proposals %}
-            <h1>Входящие запросы на обмен</h1>
-            {% for proposal in income_proposals %}
-                <a href="/ad/{{ proposal.ad_sender.id }}">
-                    <h3>{{ proposal.ad_sender.title }}</h3>
-                    <p>{{ proposal.ad_sender.description }}</p>
-                </a>
-                <a href="/ad/{{ proposal.ad_receiver.id }}">
-                    <h3>{{ proposal.ad_receiver.title }}</h3>
-                    <p>{{ proposal.ad_receiver.description }}</p>
-                </a>
-                <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>
-            {% endfor %}
-        {% endif %}
+        <h2>Запросы на обмен</h2>
 
-        {% if outcome_proposals %}
-            <h1>Исходящие запросы на обмен</h1>
-            {% for proposal in outcome_proposals %}
-                <a href="/ad/{{ proposal.ad_sender.id }}">
-                    <h3>{{ proposal.ad_sender.title }}</h3>
-                    <p>{{ proposal.ad_sender.description }}</p>
-                </a>
-                <a href="/ad/{{ proposal.ad_receiver.id }}">
-                    <h3>{{ proposal.ad_receiver.title }}</h3>
-                    <p>{{ proposal.ad_receiver.description }}</p>
-                </a>
-                <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>
-            {% endfor %}
-        {% endif %}
+        <form method="get">
+            {{ proposal_filters.form.as_p }}
+        <button type="submit">Применить</button>
+        </form>
+
+        <p></p>
+
+        {% for proposal in proposals %}
+            <div class="ad">
+                <img class="ad-image" src="/media/{{ proposal.ad_sender.image }}" alt="{{ proposal.ad_sender.image }}">
+                <p></p>
+                <a href="/ad/{{ proposal.ad_sender.id }}">{{ proposal.ad_sender.title }}</a>
+                <p>{{ proposal.ad_sender.description }}</p>
+
+                <img class="ad-image" src="/media/{{ proposal.ad_receiver.image }}" alt="{{ proposal.ad_receiver.image }}">
+                <p></p>
+                <a href="/ad/{{ proposal.ad_receiver.id }}">{{ proposal.ad_receiver.title }}</a>
+                <p>{{ proposal.ad_sender.description }}</p>
+            </div>
+            <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>
+
+            <p></p>
+        {% endfor %}
     {% else %}
         <a href="{% url 'auth' %}">Войти</a>
     {% endif %}

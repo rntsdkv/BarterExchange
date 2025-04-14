@@ -1,8 +1,12 @@
 <!DOCTYPE html>
+{% load static %}
 <html>
-<head></head>
+<head>
+    <link href="{% static "css/ad.css" %}" rel="stylesheet">
+</head>
 <body>
     <h1>{{ ad.title }}</h1>
+    <img class="image" src="/media/{{ ad.image }}" alt="{{ ad.image }}">
     <p>Пользователь: {{ ad.user.username }}</p>
     <img src="/media/{{ ad.image }}" alt="{{ ad.image }}">
     <p>Описание: {{ ad.description }}</p>
