@@ -3,7 +3,7 @@
 <head></head>
 <body>
     <h1>{{ ad.title }}</h1>
-    <p>{{ ad.image }}</p>
+    <p>Пользователь: {{ ad.user.username }}</p>
     <img src="/media/{{ ad.image }}" alt="{{ ad.image }}">
     <p>Описание: {{ ad.description }}</p>
     <p>Категория: {{ ad.category }}</p>
