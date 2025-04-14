@@ -30,35 +30,54 @@
             {% endfor %}
         {% endif %}
 
-        {% if income_proposals %}
-            <h1>Входящие запросы на обмен</h1>
-            {% for proposal in income_proposals %}
-                <a href="/ad/{{ proposal.ad_sender.id }}">
-                    <h3>{{ proposal.ad_sender.title }}</h3>
-                    <p>{{ proposal.ad_sender.description }}</p>
-                </a>
-                <a href="/ad/{{ proposal.ad_receiver.id }}">
-                    <h3>{{ proposal.ad_receiver.title }}</h3>
-                    <p>{{ proposal.ad_receiver.description }}</p>
-                </a>
-                <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>
-            {% endfor %}
-        {% endif %}
+{#        {% if income_proposals %}#}
+{#            <h1>Входящие запросы на обмен</h1>#}
+{#            {% for proposal in income_proposals %}#}
+{#                <a href="/ad/{{ proposal.ad_sender.id }}">#}
+{#                    <h3>{{ proposal.ad_sender.title }}</h3>#}
+{#                    <p>{{ proposal.ad_sender.description }}</p>#}
+{#                </a>#}
+{#                <a href="/ad/{{ proposal.ad_receiver.id }}">#}
+{#                    <h3>{{ proposal.ad_receiver.title }}</h3>#}
+{#                    <p>{{ proposal.ad_receiver.description }}</p>#}
+{#                </a>#}
+{#                <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>#}
+{#            {% endfor %}#}
+{#        {% endif %}#}
+{##}
+{#        {% if outcome_proposals %}#}
+{#            <h1>Исходящие запросы на обмен</h1>#}
+{#            {% for proposal in outcome_proposals %}#}
+{#                <a href="/ad/{{ proposal.ad_sender.id }}">#}
+{#                    <h3>{{ proposal.ad_sender.title }}</h3>#}
+{#                    <p>{{ proposal.ad_sender.description }}</p>#}
+{#                </a>#}
+{#                <a href="/ad/{{ proposal.ad_receiver.id }}">#}
+{#                    <h3>{{ proposal.ad_receiver.title }}</h3>#}
+{#                    <p>{{ proposal.ad_receiver.description }}</p>#}
+{#                </a>#}
+{#                <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>#}
+{#            {% endfor %}#}
+{#        {% endif %}#}
 
-        {% if outcome_proposals %}
-            <h1>Исходящие запросы на обмен</h1>
-            {% for proposal in outcome_proposals %}
-                <a href="/ad/{{ proposal.ad_sender.id }}">
-                    <h3>{{ proposal.ad_sender.title }}</h3>
-                    <p>{{ proposal.ad_sender.description }}</p>
-                </a>
-                <a href="/ad/{{ proposal.ad_receiver.id }}">
-                    <h3>{{ proposal.ad_receiver.title }}</h3>
-                    <p>{{ proposal.ad_receiver.description }}</p>
-                </a>
-                <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>
-            {% endfor %}
-        {% endif %}
+        <h2>Запросы на обмен</h2>
+
+        <form method="get">
+            {{ proposal_filters.form.as_p }}
+        <button type="submit">Применить</button>
+        </form>
+
+        {% for proposal in proposals %}
+            <a href="/ad/{{ proposal.ad_sender.id }}">
+                <h3>{{ proposal.ad_sender.title }}</h3>
+                <p>{{ proposal.ad_sender.description }}</p>
+            </a>
+            <a href="/ad/{{ proposal.ad_receiver.id }}">
+                <h3>{{ proposal.ad_receiver.title }}</h3>
+                <p>{{ proposal.ad_receiver.description }}</p>
+            </a>
+            <a href="exchange/{{ proposal.id }}">Перейти к обмену</a>
+        {% endfor %}
     {% else %}
         <a href="{% url 'auth' %}">Войти</a>
     {% endif %}

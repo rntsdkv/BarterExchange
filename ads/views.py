@@ -3,7 +3,7 @@ from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django_filters.views import FilterView
 
-from .forms import AdForm, RegistrationForm
+from .forms import AdForm, RegistrationForm, ProposalFilter
 from .models import Ad, ExchangeProposal, StatusChoices, AdStatus
 
 
@@ -11,6 +11,8 @@ def index(request):
     income_proposals = []
     outcome_proposals = []
     user_ads = []
+
+    proposals_filterset = ProposalFilter(request.GET, queryset=ExchangeProposal.objects.all())
 
     if request.user.is_authenticated:
         user_ads = request.user.my_ads.filter(status=AdStatus.ACTIVE)
@@ -27,7 +29,9 @@ def index(request):
         'color': request.GET.get('color'),
         'income_proposals': income_proposals,
         'outcome_proposals': outcome_proposals,
-        'user_ads': user_ads
+        'user_ads': user_ads,
+        'proposal_filters': proposals_filterset,
+        'proposals': proposals_filterset.qs
     }
     return render(request, 'index.html', context)
 
