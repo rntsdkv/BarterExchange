@@ -1,10 +1,12 @@
 from django import forms
+from django.contrib.auth import user_logged_in
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
+from django.template.context_processors import request
 from django_filters.views import FilterView
 import django_filters
-from ads.models import Ad, AdCategory, AdStatus, AdCondition
+from ads.models import Ad, AdCategory, AdStatus, AdCondition, StatusChoices, ExchangeProposal
 
 
 class AdForm(forms.ModelForm):
@@ -62,7 +64,10 @@ class CustomLoginView(LoginView):
     redirect_authenticated_user = True
 
 class AdFilter(django_filters.FilterSet):
-    search = django_filters.CharFilter(method='filter_search', label='Поиск')
+    search = django_filters.CharFilter(
+        method='filter_search',
+        label='Поиск'
+    )
     category = django_filters.ModelMultipleChoiceFilter(
         queryset=AdCategory.objects.all(),
         widget=forms.CheckboxSelectMultiple,
@@ -94,3 +99,37 @@ class AdFilterView(FilterView):
 
     def get_queryset(self):
         return Ad.objects.filter(status=AdStatus.ACTIVE)
+
+class ProposalFilter(django_filters.FilterSet):
+    sender = django_filters.CharFilter(
+        method='filter_sender_search',
+        label='Поиск по отправителю'
+    )
+    receiver = django_filters.CharFilter(
+        method='filter_receiver_search',
+        label='Поиск по получателю'
+    )
+    status = django_filters.ChoiceFilter(
+        choices=StatusChoices.choices,
+        label='Статус'
+    )
+
+    class Meta:
+        model = ExchangeProposal
+        fields = []
+
+    def filter_sender_search(self, queryset, name, value):
+        return queryset.filter(
+            ad_sender__user__username__icontains=value
+        )
+
+    def filter_receiver_search(self, queryset, name, value):
+        return queryset.filter(
+            ad_receiver__user__username__icontains=value
+        )
+
+class ProposalFilterView(FilterView):
+    model = ExchangeProposal
+    filterset_class = ProposalFilter
+    template_name = 'index.html'
+    context_object_name = 'proposals'

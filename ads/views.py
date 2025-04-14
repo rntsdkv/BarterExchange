@@ -1,9 +1,6 @@
-from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from django_filters.views import FilterView
-
-from .forms import AdForm, RegistrationForm
+from .forms import AdForm, RegistrationForm, ProposalFilter
 from .models import Ad, ExchangeProposal, StatusChoices, AdStatus
 
 
@@ -11,6 +8,8 @@ def index(request):
     income_proposals = []
     outcome_proposals = []
     user_ads = []
+
+    proposals_filterset = ProposalFilter(request.GET, queryset=ExchangeProposal.objects.all())
 
     if request.user.is_authenticated:
         user_ads = request.user.my_ads.filter(status=AdStatus.ACTIVE)
@@ -27,7 +26,9 @@ def index(request):
         'color': request.GET.get('color'),
         'income_proposals': income_proposals,
         'outcome_proposals': outcome_proposals,
-        'user_ads': user_ads
+        'user_ads': user_ads,
+        'proposal_filters': proposals_filterset,
+        'proposals': proposals_filterset.qs
     }
     return render(request, 'index.html', context)
 
@@ -75,7 +76,6 @@ def register(request):
 
 def ad(request, id):
     ad = get_object_or_404(Ad, id=id)
-    # todo: fix 404 page
     return render(request, 'ad.html', {'ad': ad})
 
 def no_access(request):
@@ -119,37 +119,6 @@ def ad_delete(request, id):
     return redirect(f'/?message={message}&color={color}')
 
 
-'''
-def search(request):
-    query = request.GET.get('query')
-    page = request.GET.get('page')
-    if page is None: page = 1
-
-    if query:
-        # todo: исправить нижний регистр
-        results = Ad.objects.filter(
-            Q(status=AdStatus.ACTIVE) &
-            (Q(title__icontains=query) | Q(description__icontains=query))
-        )
-    else:
-        results = Ad.objects.filter(status=AdStatus.ACTIVE)
-
-    paginator = Paginator(results, 10)
-    results_of_page = paginator.get_page(page)
-
-    filter_form = FilterView()
-
-    return render(request, 'search.html', {
-        'query': query,
-        'results': results,
-        'results_of_page': results_of_page,
-        'next_page': results_of_page.number + 1,
-        'current_page': page,
-        'previous_page': results_of_page.number - 1,
-        'form': filter_form
-    })
-'''
-
 def ad_exсhange(request, id):
     if not request.user.is_authenticated:
         return redirect('auth')
@@ -163,7 +132,17 @@ def ad_exсhange(request, id):
     user_ad = get_object_or_404(Ad, id=int(selected))
 
     if request.method == 'POST':
-        # todo: проверка что пользователь не один и тот же
+        if ad.user.id == user_ad.user.id:
+            message = "Вы не можете обменяться с самим собой"
+            color = "red"
+            return redirect(f'/?message={message}&color={color}')
+
+        if ExchangeProposal.objects.filter(ad_sender=ad, ad_receiver=user_ad).exists()\
+                or ExchangeProposal.objects.filter(ad_sender=user_ad, ad_receiver=ad).exists():
+            message = "Такой запрос на обмен уже существует"
+            color = "red"
+            return redirect(f'/?message={message}&color={color}')
+
         comment = request.POST.get("comment")
         print(user_ad, ad, comment)
         ExchangeProposal.objects.create(ad_sender=user_ad, ad_receiver=ad, comment=comment)
