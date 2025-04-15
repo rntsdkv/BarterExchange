@@ -43,13 +43,11 @@ def new_ad_form(request):
             ad = form.save(commit=False)
             ad.user = request.user
             ad.save()
-            print(form.cleaned_data)
 
             message = "Объявление успешно опубликовано"
             color = "green"
             return redirect(f'/?message={message}&color={color}')
         else:
-            print(form.errors)
             form = AdForm()
 
             context = {'form': form,
@@ -84,12 +82,13 @@ def no_access(request):
 def ad_edit(request, id):
     ad = get_object_or_404(Ad, id=id)
 
-    print(ad)
-
-    if ad.user != request.user:
-        return redirect('no_access')
-
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect('auth')
+
+        if ad.user != request.user:
+            return redirect('no_access')
+
         form = AdForm(request.POST, request.FILES, instance=ad)
         if form.is_valid():
             form.save()
@@ -105,6 +104,9 @@ def ad_delete(request, id):
     ad = get_object_or_404(Ad, id=id)
 
     if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return redirect('auth')
+
         if ad.user != request.user:
             return redirect('no_access')
 
@@ -132,6 +134,9 @@ def ad_exсhange(request, id):
     user_ad = get_object_or_404(Ad, id=int(selected))
 
     if request.method == 'POST':
+        if user_ad.user.id != request.user.id:
+            return redirect('no_access')
+
         if ad.user.id == user_ad.user.id:
             message = "Вы не можете обменяться с самим собой"
             color = "red"
@@ -143,8 +148,7 @@ def ad_exсhange(request, id):
             color = "red"
             return redirect(f'/?message={message}&color={color}')
 
-        comment = request.POST.get("comment")
-        print(user_ad, ad, comment)
+        comment = request.GET.get("comment")
         ExchangeProposal.objects.create(ad_sender=user_ad, ad_receiver=ad, comment=comment)
 
         message = "Вы отправили запрос на обмен"
@@ -173,19 +177,21 @@ def exchange(request, id):
 
 def exchange_update(request, id):
     proposal = get_object_or_404(ExchangeProposal, id=id)
+
     if not request.user.is_authenticated:
         return redirect('auth')
 
     if request.method == 'POST' and proposal.status == StatusChoices.PENDING:
         action = request.GET.get('action')
-        print(action)
+
+        if request.user.id != proposal.ad_sender.user.id and request.user.id != proposal.ad_receiver.user.id:
+            return redirect('no_access')
+
+        if proposal.ad_sender.status != AdStatus.ACTIVE or proposal.ad_receiver.status != AdStatus.ACTIVE:
+            return redirect('no_access')
 
         if action == 'reject':
-            if request.user.id == proposal.ad_sender.user_id or request.user.id == proposal.ad_receiver.user_id:
-                print('reject')
-                proposal.reject()
-            else:
-                return redirect('no_access')
+            proposal.reject()
         elif action == 'accept':
             if request.user.id == proposal.ad_receiver.user_id:
                 proposal.accept()
