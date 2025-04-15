@@ -216,18 +216,18 @@ class AdSearchTest(TestCase):
     def test_ad_search_none_query_returns_all(self):
         response = self.client.get(reverse('search'))
         self.assertContains(response, 'Test Ad 1')
-        response = self.client.get(f'{reverse('search')}?page=2')
+        response = self.client.get(f'{reverse("search")}?page=2')
         self.assertContains(response, 'Test Ad 2')
-        response = self.client.get(f'{reverse('search')}?page=3')
+        response = self.client.get(f'{reverse("search")}?page=3')
         self.assertContains(response, 'Test Ad 3')
 
     def test_ad_search_first_ad(self):
-        response = self.client.get(f'{reverse('search')}?search=Ad 1')
+        response = self.client.get(f'{reverse("search")}?search=Ad 1')
         self.assertContains(response, 'Test Ad 1')
         self.assertContains(response, 'Страница 1 из 1')
 
     def test_ad_search_not_exists(self):
-        response = self.client.get(f'{reverse('search')}?search=A1')
+        response = self.client.get(f'{reverse("search")}?search=A1')
         self.assertContains(response, 'Нет объявлений')
 
 
@@ -271,7 +271,7 @@ class ProposalCreateTest(TestCase):
 
     def test_proposal_create_ad_is_not_exists(self):
         self.client.login(username="testuser", password="testpassword")
-        response = self.client.post(f'{reverse('ad_exchange', args=[999])}?selected=1')
+        response = self.client.post(f'{reverse("ad_exchange", args=[999])}?selected=1')
         self.assertEqual(ExchangeProposal.objects.count(), 0)
         self.assertEqual(response.status_code, 404)
 
@@ -350,7 +350,7 @@ class ProposalUpdateTest(TestCase):
 
     def test_proposal_update_if_not_exists(self):
         self.client.login(username="testuser", password="testpassword")
-        response = self.client.post(f'{reverse('exchange_update', args=[999])}?action=reject')
+        response = self.client.post(f'{reverse("exchange_update", args=[999])}?action=reject')
         self.assertEqual(response.status_code, 404)
 
     def test_proposal_update_if_user_is_not_authorized(self):
