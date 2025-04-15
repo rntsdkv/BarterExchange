@@ -5,17 +5,23 @@
 ### Подготовка
 
 1. Загрузить и распаковать zip-архив проекта
-2. В терминале выполнить команду `pip install -r requirements.txt`
-3. Выполнить миграцию, для этого в терминале выполнить команды
+2. Открыть терминал и перейти в папку проекта
+3. В терминале выполнить команду `pip install -r requirements.txt` или `pip3 install -r requirements.txt`
+4. Выполнить миграцию, для этого в терминале выполнить команды
 ```
 python manage.py makemigrations
 python manage.py migrate
 ```
+или
+```
+python3 manage.py makemigrations
+python3 manage.py migrate
+```
 
 ### Запуск сервера
-В терминале выполнить команду `python manage.py runserver`
+В терминале выполнить команду `python manage.py runserver` или `python3 manage.py runserver`
 После этого сайт будет доступен по адресу `127.0.0.1:8000`
-Если нужно запустить на другом порту, нужно выполнить команду `python manage.py runserver 127.0.0.1:<порт>`
+Если нужно запустить на другом порту, нужно выполнить команду `python manage.py runserver 127.0.0.1:<порт>` или `python3 manage.py runserver 127.0.0.1:<порт>`
 
 ### Запуск тестов
-В терминале выполнить команду `python manage.py test`
+В терминале выполнить команду `python manage.py test` или `python3 manage.py test`
