@@ -6,7 +6,6 @@ from django.urls import reverse, path
 from ads.models import Ad, AdCategory, AdCondition, ExchangeProposal, StatusChoices, AdStatus
 from . import views
 
-# Create your tests here.
 urlpatterns = [
     path('', views.index, name='index'),
     path('ad/<int:id>/edit/', views.ad_edit, name='ad_edit'),
@@ -231,3 +230,168 @@ class AdSearchTest(TestCase):
         response = self.client.get(f'{reverse('search')}?search=A1')
         self.assertContains(response, 'Нет объявлений')
 
+
+class ProposalCreateTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpassword")
+        self.user2 = User.objects.create_user(username="testuser2", password="testpassword2")
+        self.ad1 = Ad.objects.create(
+            title="Test Ad User 1",
+            description="Test description",
+            user=self.user,
+            image="test image",
+            category=AdCategory.objects.create(title="testcategory"),
+            condition=AdCondition.NEW
+        )
+        self.ad2 = Ad.objects.create(
+            title="Test Ad User 2",
+            description="Test description",
+            user=self.user2,
+            image="test image",
+            category=AdCategory.objects.create(title="testcategory"),
+            condition=AdCondition.NEW
+        )
+        self.ad3 = Ad.objects.create(
+            title="Test Ad 2 User 1",
+            description="Test description",
+            user=self.user,
+            image="test image",
+            category=AdCategory.objects.create(title="testcategory"),
+            condition=AdCondition.NEW
+        )
+        self.url = reverse('ad_exchange', args=[self.ad1.id])
+
+    def test_proposal_create_get_returns_302(self):
+        response = self.client.get(f'{self.url}?selected={self.ad2.id}')
+        self.assertEqual(response.status_code, 302)
+
+    def test_proposal_create_if_user_is_not_authorized(self):
+        response = self.client.post(self.url)
+        self.assertRedirects(response, reverse('auth'))
+
+    def test_proposal_create_ad_is_not_exists(self):
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.post(f'{reverse('ad_exchange', args=[999])}?selected=1')
+        self.assertEqual(ExchangeProposal.objects.count(), 0)
+        self.assertEqual(response.status_code, 404)
+
+    def test_proposal_create_selected_ad_is_not_exists(self):
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.post(f'{self.url}?selected=999')
+        self.assertEqual(ExchangeProposal.objects.count(), 0)
+        self.assertEqual(response.status_code, 404)
+
+    def test_proposal_create_selected_ad_is_not_digit(self):
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.post(f'{self.url}?selected=test')
+        self.assertEqual(ExchangeProposal.objects.count(), 0)
+        self.assertEqual(response.status_code, 200)
+
+    def test_proposal_create_if_user_dont_have_access(self):
+        self.client.login(username="testuser2", password="testpassword2")
+        response = self.client.post(f'{self.url}?selected=3')
+        self.assertEqual(ExchangeProposal.objects.count(), 0)
+        self.assertRedirects(response, reverse('no_access'))
+
+    def test_proposal_create_if_user_exchanges_himself(self):
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.post(f'{self.url}?selected=3')
+        self.assertEqual(ExchangeProposal.objects.count(), 0)
+        self.assertEqual(response.status_code, 302)
+
+    def test_proposal_create_if_proposal_exists(self):
+        ExchangeProposal.objects.create(
+            ad_sender=self.ad1,
+            ad_receiver=self.ad2,
+            comment='test comment'
+        )
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.post(f'{self.url}?selected=2')
+        self.assertEqual(ExchangeProposal.objects.count(), 1)
+        self.assertEqual(response.status_code, 302)
+
+    def test_proposal_create_returns_302(self):
+        self.client.login(username="testuser2", password="testpassword2")
+        response = self.client.post(f'{self.url}?selected=2&comment=test')
+        self.assertEqual(ExchangeProposal.objects.count(), 1)
+        self.assertEqual(response.status_code, 302)
+
+class ProposalUpdateTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="testuser", password="testpassword")
+        self.user2 = User.objects.create_user(username="testuser2", password="testpassword2")
+        self.user3 = User.objects.create_user(username="testuser3", password="testpassword3")
+        self.ad1 = Ad.objects.create(
+            title="Test Ad User 1",
+            description="Test description",
+            user=self.user,
+            image="test image",
+            category=AdCategory.objects.create(title="testcategory"),
+            condition=AdCondition.NEW
+        )
+        self.ad2 = Ad.objects.create(
+            title="Test Ad User 2",
+            description="Test description",
+            user=self.user2,
+            image="test image",
+            category=AdCategory.objects.create(title="testcategory"),
+            condition=AdCondition.NEW
+        )
+        self.proposal = ExchangeProposal.objects.create(
+            ad_sender=self.ad1,
+            ad_receiver=self.ad2,
+            comment='test comment'
+        )
+        self.url = reverse('exchange_update', args=[self.proposal.id])
+
+    def test_proposal_update_get_returns_302(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+
+    def test_proposal_update_if_not_exists(self):
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.post(f'{reverse('exchange_update', args=[999])}?action=reject')
+        self.assertEqual(response.status_code, 404)
+
+    def test_proposal_update_if_user_is_not_authorized(self):
+        response = self.client.post(f'{self.url}?action=reject')
+        self.assertRedirects(response, reverse('auth'))
+
+    def test_proposal_update_if_proposal_not_pending(self):
+        self.client.login(username="testuser", password="testpassword")
+        self.proposal.status = StatusChoices.REJECTED
+        response = self.client.post(f'{self.url}?action=accept')
+        self.assertEqual(self.proposal.status, StatusChoices.REJECTED)
+        self.assertEqual(response.status_code, 302)
+
+    def test_proposal_update_if_ads_not_active(self):
+        self.client.login(username="testuser", password="testpassword")
+        self.ad1.status = AdStatus.EXCHANGED
+        self.ad1.save()
+        response = self.client.post(f'{self.url}?action=accept')
+        self.assertRedirects(response, reverse('no_access'))
+
+    def test_proposal_update_if_user_have_no_access(self):
+        self.client.login(username="testuser3", password="testpassword3")
+        self.proposal.status = StatusChoices.PENDING
+        self.ad1.status = AdStatus.ACTIVE
+        response = self.client.post(f'{self.url}?action=accept')
+        self.assertEqual(self.proposal.status, StatusChoices.PENDING)
+        self.assertRedirects(response, reverse('no_access'))
+
+    def test_proposal_update_user_created_proposal(self):
+        self.client.login(username="testuser", password="testpassword")
+        response = self.client.post(f'{self.url}?action=accept')
+        self.assertEqual(self.proposal.status, StatusChoices.PENDING)
+        self.assertRedirects(response, reverse('no_access'))
+
+    def test_proposal_update_valid_returns_302(self):
+        self.client.login(username="testuser2", password="testpassword2")
+        response = self.client.post(f'{self.url}?action=accept')
+        self.proposal.refresh_from_db()
+        self.ad1.refresh_from_db()
+        self.ad2.refresh_from_db()
+        self.assertEqual(self.proposal.status, StatusChoices.ACCEPTED)
+        self.assertEqual(self.ad1.status, AdStatus.EXCHANGED)
+        self.assertEqual(self.ad2.status, AdStatus.EXCHANGED)
+        self.assertEqual(response.status_code, 302)
