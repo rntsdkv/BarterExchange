@@ -17,6 +17,14 @@ python manage.py migrate
 python3 manage.py makemigrations
 python3 manage.py migrate
 ```
+5. Для возможности использования, необходимо добавить категории объявлений, для этого нужно в терминале выполнить команды
+`python manage.py dbshell` или `python3 manage.py dbshell`, затем выполнить команды
+```
+INSERT INTO ads_adcategory (title) VALUES ("Украшения");
+INSERT INTO ads_adcategory (title) VALUES ("Продукты питания");
+INSERT INTO ads_adcategory (title) VALUES ("Бытовые принадлежности");
+INSERT INTO ads_adcategory (title) VALUES ("Мебель");
+```
 
 ### Запуск сервера
 В терминале выполнить команду `python manage.py runserver` или `python3 manage.py runserver`
